@@ -1,19 +1,21 @@
 -- Assessment_Q4.sql
 -- Customer Lifetime Value (CLV) Estimation
--- This query estimates CLV based on transaction volume and tenure in months since signup.
+-- This query estimates CLV using transaction volume and account tenure in months.
 -- Formula: CLV = (total_transactions / tenure) * 12 * avg_profit_per_transaction
 
 SELECT
     u.id AS customer_id,
-    u.name,
-    
-    -- Tenure in full months since customer signup
+
+    -- Combine first and last names to get the full customer name
+    CONCAT(u.first_name, ' ', u.last_name) AS name,
+
+    -- Calculate tenure in full months since the user joined
     TIMESTAMPDIFF(MONTH, u.date_joined, CURDATE()) AS tenure_months,
 
-    -- Total number of transactions
+    -- Total number of transactions linked to the user
     COUNT(s.id) AS total_transactions,
 
-    -- Estimated CLV based on simplified model
+    -- Estimated CLV using the provided formula
     ROUND(
         (
             COUNT(s.id) / NULLIF(TIMESTAMPDIFF(MONTH, u.date_joined, CURDATE()), 0)
@@ -23,12 +25,14 @@ SELECT
 FROM
     users_customuser u
 
--- Join to savings transactions to access transaction data
+-- Join savings transactions with user table
 JOIN
     savings_savingsaccount s ON u.id = s.owner_id
 
+-- Group by necessary user fields
 GROUP BY
-    u.id, u.name, u.date_joined
+    u.id, u.first_name, u.last_name, u.date_joined
 
+-- Sort by estimated CLV in descending order
 ORDER BY
     estimated_clv DESC;
