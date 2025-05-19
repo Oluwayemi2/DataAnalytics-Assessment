@@ -101,5 +101,3 @@ Profit per transaction = 0.1% of transaction value.
 
 ---
 
-## Repository Structure
-
